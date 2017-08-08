@@ -1,22 +1,22 @@
-##
-# geodata/gdal
-# This creates an Ubuntu derived base image that installs the latest GDAL
-# subversion checkout compiled with a broad range of drivers.  The build process
-# is based on that defined in
-# <https://github.com/OSGeo/gdal/blob/trunk/.travis.yml>
-
-# Ubuntu 14.04 Trusty Tahyr
-FROM ubuntu:trusty
-
-MAINTAINER Homme Zwaagstra <hrz@geodata.soton.ac.uk>
+# Ubuntu 14.04
+FROM geodata/gdal:2.1.3
 
 # Install the application.
-ADD . /usr/local/src/gdal-docker/
-RUN /usr/local/src/gdal-docker/build.sh
+ADD . /app/src
+WORKDIR /app/src
 
-# Externally accessible data is by default put in /data
-WORKDIR /data
-VOLUME ["/data"]
+# install python
+RUN add-apt-repository -y ppa:deadsnakes/ppa
+RUN apt-get update
+RUN apt-get install -y python3.6
+
+# install pip
+RUN wget "https://bootstrap.pypa.io/get-pip.py" -O /app/get-pip.py
+RUN python3.6 /app/get-pip.py
+RUN rm /app/get-pip.py
+
+# install python dependencies
+RUN python3.6 -m pip install -r requirements.txt
 
 # Output version and capabilities by default.
-CMD gdalinfo --version && gdalinfo --formats && ogrinfo --formats
+CMD /bin/bash
